@@ -1,5 +1,7 @@
 # Tokenizer
 
+[![Affinity4](https://circleci.com/gh/affinity4/tokenizer.svg?style=svg)](https://circleci.com/gh/affinity4/tokenizer)
+
 A zero-dedpendency tokenizer written in PHP. Returns an easily navigatable Stream object of Token objects with public type, value, offset and length properties
 
 Simply pass an associative array [match_pattern => type] (`'\s+' => 'T_WHITESPACE', '[a-zA-Z]\w+' => 'T_STRING'`), and the Tokenizer will return all matches as an array of Token objects
