@@ -163,13 +163,13 @@ class Stream
 	}
 
 	/**
-	 * Reset
+	 * Rewind
 	 *
 	 * @return self
 	 */
 	public function rewind(): self
 	{
-		$this->position = -1;
+		$this->position = 0;
 		
 		return $this;
 	}

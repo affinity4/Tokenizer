@@ -114,37 +114,32 @@ There are constants defined for all of these to help you avoid using the switche
 
 ## preg_match_all(): Compilation failed: missing closing parenthesis at offset x
 
-Attempting to match backslashes, or newline chars (e.g. \r|\n|\r\n) is most likely the cause of your troubles here
+Attempting to match backslashes, or newline chars (e.g. \r|\n|\r\n) is most likely the cause of your troubles.
 
-You will need to double escape backslashes. To help you avoid needing to figure this out I have provided 2 constants which contain the correct regex patterns for T_ESCAPE_CHAR and T_NEWLINE_ALL
+You will need to double escape backslashes. To help you avoid needing to figure this out I have provided the correct regex patterns for T_ESCAPE_CHAR.
 
 ```php
 $lexicon = [
     // ...
     Tokenize::T_ESCAPE_CHAR => 'T_ESCAPE', // '\\\\'
-    Tokenize::T_NEWLINE_ALL => 'T_NEWLINE', // '\n|\r\n|\r'
+    Tokenize::T_NEWLINE     => 'T_NEWLINE', // ';T_NEWLINE;'
+    // ...
+]
+```
+
+### Newlines
+
+Newlines will need to be replaced with a token before they can be matched. By default the T_NEWLINE_ALL constant will match `;T_NEWLINE;`
+
+```php
+$lexicon = [
+    // ...
+    Tokenize::T_NEWLINE => 'T_NEWLINE', // ';T_NEWLINE;'
     // ...
 ]
 ```
 
 If you need to match individual newline characters for a specific environment you can use the following constants
-
-```php
-$lexicon = [
-    // ...
-    T_NEWLINE_UNIX  => 'T_NEWLINE_UNIX',  // '\n'
-    T_NEWLINE_WIN   => 'T_NEWLINE_WIN',  // '\r\n'
-    /**
-     * Not only Mac, but everyone thinks it is. 
-     * \r is actually a valid newline character on all systems
-     */
-    T_NEWLINE_MAC   => 'T_NEWLINE_MAC', // '\r'
-    // ...
-];
-```
-
-**TIP:**  
-You should clean newlines before running input through the Tokenizer `$input = str_replace(["\r\n", "\r"], "\n", $input)`
 
 See the following section on Matching Backslashes and Special Characters if you want more info
 
@@ -154,8 +149,21 @@ As mentioned above, backslashes must be double escaped.
 
 So to match a single backslash your must use the regex `'\\\\'` (I know, it sucks, but you have to)
 
-To match special characters (tabs, newlines, cariage returns etc) you MUST NOT USE DOUBLE QUOTES. This is because a double quoted "\n" will just become an actual newline character in PHP.
+To match special characters (tabs, newlines, cariage returns etc) you will need to replace them with another token first, and then add a token for the replacement string.
 
-So always use single quotes for special charachters. In fact, things will work better for you if all your Lexixon patterns are surrounded with single quotes when ever possible. E.g `'\r|\n|\r\\n|\t'`
+```php
+$input = str_replace(["\r\n", "\r", "\n"], ";T_NEWLINE;", $input);
+$input = str_replace("\t", ";T_TAB;", $input);
 
-I will work on some better detection internally for these patterns and attempt to provide better error messages when these errors are encountered *(I'll go real meta and regex the regex before it's ran or something)*
+$lexicon = [
+    // ...
+    Token::T_NEWLINE => 'T_NEWLINE',
+    Token::T_TAB     => 'T_TAB'
+    // ...
+];
+
+$Tokenizer = new Tokenizer($lexicon);
+$Steam = $Tokenizer->tokenize($input);
+```
+
+I am working on some better detection internally for these patterns and attempt to provide better error messages when these errors are encountered *(I'll go real meta and regex the regex before it's ran or something)*

@@ -26,15 +26,8 @@ class TokenTest extends TestCase
     {
         return [
             [Token::T_ESCAPE_CHAR, 'T_ESCAPE_CHAR', '\\\\', '\\'],
-            [Token::T_NEWLINE_UNIX, 'T_NEWLINE_UNIX', '\n', "\n"],
-            [Token::T_NEWLINE_WIN, 'T_NEWLINE_WIN', '\r\n', "\r\n"],
-            [Token::T_NEWLINE_MAC, 'T_NEWLINE_MAC', '\r', "\r"],
-            [Token::T_CARRIAGE_RETURN, 'T_CARRIAGE_RETURN', '\r', "\r"],
-            [Token::T_RETURN, 'T_RETURN', '\r', "\r"],
-            [Token::T_NEWLINE_ALL, 'T_NEWLINE_ALL', '\n|\r\n|\r', "\n"],
-            [Token::T_NEWLINE_ALL, 'T_NEWLINE_ALL', '\n|\r\n|\r', "\r\n"],
-            [Token::T_NEWLINE_ALL, 'T_NEWLINE_ALL', '\n|\r\n|\r', "\r"],
-            [Token::T_TAB, 'T_TAB', '\t', "\t"],
+            [Token::T_NEWLINE, 'T_NEWLINE', ';T_NEWLINE;', ";T_NEWLINE;"],
+            [Token::T_TAB, 'T_TAB', ';T_TAB;', ";T_TAB;"],
             [Token::T_WHITESPACE, 'T_WHITESPACE', '\s+', '    '],
 
             // Miscellaneous Symbols
@@ -79,7 +72,7 @@ class TokenTest extends TestCase
             [Token::T_CARET, 'T_CARET', '\^', '^'],
             [Token::T_EXCLAIMATION_MARK, 'T_EXCLAIMATION_MARK', "!", "!"],
             [Token::T_QUESTION_MARK, 'T_QUESTION_MARK', '\?', '?'],
-            [Token::T_DOUBLE_QOUTE, 'T_DOUBLE_QOUTE', '"', '"'],
+            [Token::T_DOUBLE_QUOTE, 'T_DOUBLE_QUOTE', '"', '"'],
             [Token::T_SINGLE_QUOTE, 'T_SINGLE_QUOTE', "'", "'"],
 
             [Token::T_OPEN_PARENTHESIS, 'T_OPEN_PARENTHESIS', "\(", "("],
