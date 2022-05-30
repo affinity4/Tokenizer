@@ -61,6 +61,8 @@ class Stream
 	 * 
 	 * Skip each token that is a match in ...$args
 	 * Stops when a token does not match ...$args list
+	 * 
+	 * @since 0.0.3
 	 *
 	 * @param string $type
 	 *
@@ -75,15 +77,36 @@ class Stream
 	}
 
 	/**
+	 * skip Until
+	 * 
+	 * Moves forward until one of the provided token types is matched
+	 * 
+	 * @since 0.0.4
+	 *
+	 * @param array $args
+	 */
+	public function skipUntil(...$args)
+	{
+		$Token = $this->current();
+		while ($Token && !in_array($Token->type, $args)) {
+			$Token = $this->next();
+		}
+	}
+
+	/**
 	 * Consume While
 	 * 
 	 * Moves pointer ahead while  type is one of ...$args
 	 * 
 	 * Returns array of tokens which where 'consumed'
+	 * 
+	 * @since 0.0.3
+	 * 
+	 * @param array $args
 	 *
 	 * @return array
 	 */
-	public function consumeWhile(... $args): array
+	public function consumeWhile(...$args): array
 	{
 		$token = $this->current();
 		$tokens = [];
@@ -97,18 +120,21 @@ class Stream
 
 	/**
 	 * consumeValueWhile
+	 * 
+	 * @since 0.0.3
 	 *
-	 * @param arglist $args
+	 * @param array $args
 	 *
 	 * @return string
 	 */
-	public function consumeValueWhile(... $args): string
+	public function consumeValueWhile(...$args): string
 	{
 		$tokens = $this->consumeWhile(...$args);
 		$i = 0;
 		$value = '';
-		while ($tokens[$i]) {
+		while (!empty($tokens) && isset($tokens[$i])) {
 			$value .= $tokens[$i]->value;
+			++$i;
 		}
 
 		return $value;
@@ -118,8 +144,10 @@ class Stream
 	 * Consume Value Until
 	 * 
 	 * Returns value up until one of the provided token types is matched
+	 * 
+	 * @since 0.0.3
 	 *
-	 * @param arglist $args
+	 * @param array $args
 	 * 
 	 * @return string
 	 */
@@ -133,6 +161,45 @@ class Stream
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Consume Until
+	 * 
+	 * Returns tokens array up until one of the provided token types is matched
+	 * 
+	 * @since 0.0.4
+	 *
+	 * @param array $args
+	 *
+	 * @return array
+	 */
+	public function consumeUntil(...$args): array
+	{
+		$Token = $this->current();
+		$tokens = [];
+		while ($Token && !in_array($Token->type, $args)) {
+			$tokens[] = $Token;
+			$Token = $this->next();
+		}
+
+		return $tokens;
+	}
+	
+	/**
+	 * Copy Stream Until
+	 * 
+	 * @since 0.0.4
+	 *
+	 * @param array $args
+	 * 
+	 * @return \Affinity4\Tokenizer\Stream
+	 */
+	public function copyStreamUntil(...$args): \Affinity4\Tokenizer\Stream
+	{
+		$tokens = $this->consumeUntil(...$args);
+
+		return new Stream($tokens);
 	}
 
 	/**
@@ -151,7 +218,7 @@ class Stream
 	/**
 	 * Is Current
 	 *
-	 * @param mixed ...$args
+	 * @param string $type
 	 * 
 	 * @return boolean
 	 */

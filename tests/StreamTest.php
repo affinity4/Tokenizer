@@ -414,11 +414,9 @@ TEMPLATE;
 
         $Stream = $Tokenizer->tokenize($template);
 
-        $tokens = $Stream->consumeValueWhile('T_WORD');
+        $value = $Stream->consumeValueWhile('T_WORD');
 
-        $this->assertCount(1, $tokens);
-        $this->assertSame('T_WORD', $tokens[0]->type);
-        $this->assertSame('div', $tokens[0]->value);
+        $this->assertSame('div', $value);
     }
 
     /**
