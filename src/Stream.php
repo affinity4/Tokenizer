@@ -57,40 +57,82 @@ class Stream
 	}
 
 	/**
-	 * Next All
+	 * Skip While
 	 * 
+	 * Skip each token that is a match in ...$args
+	 * Stops when a token does not match ...$args list
+	 *
+	 * @param string $type
+	 *
+	 * @return void
+	 */
+	public function skipWhile(...$args): void
+	{
+		$token = $this->current();
+		while ($token && in_array($token->type, $args)) {
+			$token = $this->next();
+		}
+	}
+
+	/**
+	 * Consume While
+	 * 
+	 * Moves pointer ahead while  type is one of ...$args
+	 * 
+	 * Returns array of tokens which where 'consumed'
+	 *
 	 * @return array
 	 */
-	public function nextAll(): array
+	public function consumeWhile(... $args): array
 	{
-		$tokens = [];
 		$token = $this->current();
-		while ($token) {
+		$tokens = [];
+		while ($token && in_array($token->type, $args)) {
 			$tokens[] = $token;
 			$token = $this->next();
 		}
-		
+
 		return $tokens;
 	}
 
 	/**
-	 * Next Until
+	 * consumeValueWhile
 	 *
-	 * @param string $type
-	 * 
-	 * @return array
+	 * @param arglist $args
+	 *
+	 * @return string
 	 */
-	public function nextUntil(string $type): array
+	public function consumeValueWhile(... $args): string
 	{
-		$tokens = [];
-		$token = $this->current();
-		while ($token && $token->type !== $type) {
-			$tokens[] = $token;
-			
-			$token = $this->next();
+		$tokens = $this->consumeWhile(...$args);
+		$i = 0;
+		$value = '';
+		while ($tokens[$i]) {
+			$value .= $tokens[$i]->value;
 		}
 
-		return $tokens;
+		return $value;
+	}
+
+	/**
+	 * Consume Value Until
+	 * 
+	 * Returns value up until one of the provided token types is matched
+	 *
+	 * @param arglist $args
+	 * 
+	 * @return string
+	 */
+	public function consumeValueUntil(...$args): string
+	{
+		$Token = $this->current();
+		$value = '';
+		while ($Token && !in_array($Token->type, $args)) {
+			$value .= $Token->value;
+			$Token = $this->next();
+		}
+
+		return $value;
 	}
 
 	/**
@@ -161,6 +203,7 @@ class Stream
 
 		return isset($this->tokens[$pos]);
 	}
+	
 
 	/**
 	 * Rewind

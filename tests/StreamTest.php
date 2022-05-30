@@ -352,4 +352,130 @@ TEMPLATE;
             $this->assertSame($next['length'], $this->Stream->current()->length);
         }
     }
+
+    /**
+     * @covers \Affinity4\Tokenizer\Stream::skipWhile
+     *
+     * @return void
+     */
+    public function testSkipWhileMethod(): void
+    {
+        $template = '    div(class="test")';
+
+        $Tokenizer = new Tokenizer([
+            '\s+' => 'T_WHITESPACE',
+            '\S+' => 'T_NOT_WHITESPACE'
+        ]);
+
+        $Stream = $Tokenizer->tokenize($template);
+
+        $Stream->skipWhile('T_WHITESPACE');
+
+        $this->assertSame('T_NOT_WHITESPACE', $Stream->current()->type);
+        $this->assertSame('div(class="test")', $Stream->current()->value);
+    }
+
+    /**
+     * @covers \Affinity4\Tokenizer\Stream::consumeWhile
+     *
+     * @return void
+     */
+    public function testConsumeWhileMethod(): void
+    {
+        $template = 'div(class="test")';
+
+        $Tokenizer = new Tokenizer([
+            '\w+' => 'T_WORD',
+            '[^a-zA-Z0-9_]' => 'T_NOT_WORD'
+        ]);
+
+        $Stream = $Tokenizer->tokenize($template);
+
+        $tokens = $Stream->consumeWhile('T_WORD');
+
+        $this->assertCount(1, $tokens);
+        $this->assertSame('T_WORD', $tokens[0]->type);
+        $this->assertSame('div', $tokens[0]->value);
+    }
+
+    /**
+     * @covers \Affinity4\Tokenizer\Stream::consumeValueWhile
+     *
+     * @return void
+     */
+    public function testConsumeValueWhileMethod(): void
+    {
+        $template = 'div(class="test")';
+
+        $Tokenizer = new Tokenizer([
+            '\w+' => 'T_WORD',
+            '[^a-zA-Z0-9_]' => 'T_NOT_WORD'
+        ]);
+
+        $Stream = $Tokenizer->tokenize($template);
+
+        $tokens = $Stream->consumeValueWhile('T_WORD');
+
+        $this->assertCount(1, $tokens);
+        $this->assertSame('T_WORD', $tokens[0]->type);
+        $this->assertSame('div', $tokens[0]->value);
+    }
+
+    /**
+     * @covers \Affinity4\Tokenizer\Stream::consumeValueUntil
+     *
+     * @return void
+     */
+    public function testConsumeValueUntilMethod(): void
+    {
+        $template = 'div(class="test")';
+
+        $Tokenizer = new Tokenizer([
+            '\w+' => 'T_WORD',
+            Token::T_OPEN_PARENTHESIS  => 'T_OPEN_PARENTHESIS',
+            Token::T_CLOSE_PARENTHESIS => 'T_CLOSE_PARENTHESIS',
+            Token::T_EQUALS            => 'T_EQUALS',
+            Token::T_DOUBLE_QUOTE      => 'T_DOUBLE_QUOTE'
+        ]);
+
+        $Stream = $Tokenizer->tokenize($template);
+
+        $Stream->skipWhile('T_WORD');
+
+        $this->assertSame('(', $Stream->current()->value);
+        $this->assertSame('T_OPEN_PARENTHESIS', $Stream->current()->type);
+        $Stream->next();
+        $attributes = $Stream->consumeValueUntil('T_CLOSE_PARENTHESIS');
+        $this->assertSame('class="test"', $attributes);
+        $this->assertSame(')', $Stream->current()->value);
+        $this->assertSame('T_CLOSE_PARENTHESIS', $Stream->current()->type);
+    }
+
+    /**
+     * @covers \Affinity4\Tokenizer\Stream::consumeValueUntil
+     *
+     * @return void
+     */
+    public function testConsumeValueUntilMethodWhereNoTokensConsumed(): void
+    {
+        $template = 'div()'; // testing what happens when the very next token is the 'until'
+
+        $Tokenizer = new Tokenizer([
+            '\w+' => 'T_WORD',
+            Token::T_OPEN_PARENTHESIS  => 'T_OPEN_PARENTHESIS',
+            Token::T_CLOSE_PARENTHESIS => 'T_CLOSE_PARENTHESIS',
+        ]);
+
+        $Stream = $Tokenizer->tokenize($template);
+
+        $Stream->skipWhile('T_WORD');
+
+        $this->assertSame('(', $Stream->current()->value);
+        $this->assertSame('T_OPEN_PARENTHESIS', $Stream->current()->type);
+        $Stream->next();
+        $attributes = $Stream->consumeValueUntil('T_CLOSE_PARENTHESIS');
+        $this->assertEmpty($attributes);
+        $this->assertSame(')', $Stream->current()->value);
+        $this->assertSame('T_CLOSE_PARENTHESIS', $Stream->current()->type);
+    }
 }
